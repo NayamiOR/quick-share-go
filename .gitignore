@@ -1,0 +1,4 @@
+﻿*.zip
+*.exe
+uploads/
+.idea/

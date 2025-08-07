@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员仪表板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .table th,
+        .table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn.danger {
+            background: #dc3545;
+        }
+        
+        .btn.danger:hover {
+            background: #c82333;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .back-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .file-size {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .access-count {
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 管理员仪表板</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{len .items}}</div>
+                    <div class="stat-label">总文件数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalAccess">0</div>
+                    <div class="stat-label">总访问次数</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            {{if .items}}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>文件名</th>
+                            <th>大小</th>
+                            <th>上传时间</th>
+                            <th>访问次数</th>
+                            <th>分享链接</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .items}}
+                        <tr>
+                            <td>{{.OriginalName}}</td>
+                            <td class="file-size">{{formatFileSize .Size}}</td>
+                            <td>{{.UploadTime.Format "2006-01-02 15:04"}}</td>
+                            <td><span class="access-count">{{.AccessCount}}</span></td>
+                            <td>
+                                <a href="/share/{{.ID}}" class="btn" target="_blank">查看</a>
+                            </td>
+                            <td>
+                                <button class="btn danger" onclick="deleteItem('{{.ID}}', '{{.OriginalName}}')">删除</button>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            {{else}}
+                <div class="empty-state">
+                    <div class="empty-icon">📁</div>
+                    <h3>暂无分享文件</h3>
+                    <p>还没有用户上传文件</p>
+                </div>
+            {{end}}
+            
+            <div class="back-link">
+                <a href="/">← 返回首页</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 计算总访问次数
+        function calculateTotalAccess() {
+            const accessCounts = document.querySelectorAll('.access-count');
+            let total = 0;
+            accessCounts.forEach(count => {
+                total += parseInt(count.textContent);
+            });
+            document.getElementById('totalAccess').textContent = total;
+        }
+        
+        // 删除分享项
+        async function deleteItem(id, filename) {
+            if (!confirm(`确定要删除文件 "${filename}" 吗？此操作不可恢复。`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/delete/${id}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('删除成功！');
+                    location.reload();
+                } else {
+                    alert('删除失败：' + data.error);
+                }
+            } catch (error) {
+                alert('删除失败：网络错误');
+            }
+        }
+        
+        // 页面加载时计算总访问次数
+        calculateTotalAccess();
+    </script>
+</body>
+</html> 

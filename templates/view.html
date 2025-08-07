@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看文件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .file-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .file-info p {
+            margin: 8px 0;
+            color: #666;
+        }
+        
+        .file-info strong {
+            color: #333;
+        }
+        
+        .preview-area {
+            margin: 30px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+        }
+        
+        .video-preview {
+            width: 100%;
+            max-height: 500px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn.secondary {
+            background: #6c757d;
+        }
+        
+        .btn.secondary:hover {
+            background: #5a6268;
+        }
+        
+        .file-icon {
+            font-size: 4em;
+            margin: 20px 0;
+        }
+        
+        .stats {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📁 文件查看</h1>
+        
+        <div class="file-info">
+            <p><strong>文件名：</strong>{{.item.OriginalName}}</p>
+            <p><strong>文件大小：</strong>{{formatFileSize .item.Size}}</p>
+            <p><strong>上传时间：</strong>{{.item.UploadTime.Format "2006-01-02 15:04:05"}}</p>
+            <p><strong>访问次数：</strong>{{.item.AccessCount}}</p>
+        </div>
+        
+        {{if isImage .item.OriginalName}}
+            <div class="preview-area">
+                <img src="{{.download_url}}" alt="{{.item.OriginalName}}" class="image-preview">
+            </div>
+        {{else if isVideo .item.OriginalName}}
+            <div class="preview-area">
+                <video controls class="video-preview">
+                    <source src="{{.download_url}}" type="video/mp4">
+                    <source src="{{.download_url}}" type="video/webm">
+                    <source src="{{.download_url}}" type="video/ogg">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+        {{else}}
+            <div class="file-icon">📄</div>
+            <p>此文件类型不支持预览，请下载查看</p>
+        {{end}}
+        
+        <div class="stats">
+            <p>📊 此文件已被访问 {{.item.AccessCount}} 次</p>
+        </div>
+        
+        <a href="{{.download_url}}" class="btn">⬇️ 下载文件</a>
+        <a href="/" class="btn secondary">🏠 返回首页</a>
+    </div>
+</body>
+</html> 
