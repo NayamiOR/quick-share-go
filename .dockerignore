@@ -1,0 +1,37 @@
+# Git相关
+.git
+.gitignore
+
+# Docker相关
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# 构建产物
+main
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 测试文件
+*_test.go
+*.test
+
+# 临时文件
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE相关
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志文件
+*.log
+
+# 上传的文件（运行时创建）
+uploads/ 
